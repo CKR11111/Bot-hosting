@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TCP PRO PANEL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #f2f2f7; font-family: -apple-system, sans-serif; height: 100vh; overflow: hidden; }
+        .ios-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.05); }
+        .terminal { background: #000; color: #32d74b; font-family: 'SF Mono', monospace; height: 150px; overflow-y: auto; border-radius: 14px; font-size: 11px; padding: 12px; }
+        .ios-btn { border-radius: 14px; transition: 0.3s; font-weight: 600; -webkit-tap-highlight-color: transparent; }
+        .ios-btn:active { transform: scale(0.95); opacity: 0.8; }
+    </style>
+</head>
+<body class="p-5 flex flex-col">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-black">TCP Panel</h1>
+            <p class="text-gray-500 text-sm font-medium">Control Center v2.0</p>
+        </div>
+        <div class="bg-blue-600 h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-200">
+            <i class="fa-solid fa-microchip text-xl"></i>
+        </div>
+    </div>
+
+    <div class="ios-card p-6 flex-1 flex flex-col min-h-0">
+        <div class="flex items-center justify-between mb-6">
+            <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase">System Active</span>
+            <i class="fa-solid fa-ellipsis-h text-gray-300"></i>
+        </div>
+
+        <div class="mb-6">
+            <input type="file" id="botzip" class="hidden" onchange="document.getElementById('file-name').innerText = 'File Ready: ' + this.files[0].name">
+            <label for="botzip" class="flex flex-col items-center justify-center w-full py-8 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-gray-100 transition cursor-pointer">
+                <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
+                <p id="file-name" class="text-sm text-gray-400 font-medium">Tap to Upload Bot (.zip)</p>
+            </label>
+        </div>
+
+        <div class="terminal mb-6 flex-1" id="logs">> System Ready. Waiting for Deploy...</div>
+
+        <div class="grid grid-cols-1 gap-3">
+            <button onclick="deploy()" class="w-full bg-black text-white py-4 ios-btn shadow-lg">DEPLOY SOURCE</button>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="start()" class="bg-blue-600 text-white py-4 ios-btn shadow-lg shadow-blue-200"><i class="fa-solid fa-play mr-2"></i>START</button>
+                <button onclick="location.reload()" class="bg-white text-red-500 py-4 ios-btn border border-red-100"><i class="fa-solid fa-power-off mr-2"></i>RESET</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logBox = document.getElementById('logs');
+        function addLog(msg, color="text-green-400") {
+            logBox.innerHTML += `<div class="${color}">> ${msg}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        async function deploy() {
+            let file = document.getElementById('botzip').files[0];
+            if(!file) return alert("Please select a zip file!");
+            addLog("Uploading " + file.name + "...", "text-blue-400");
+            let fd = new FormData(); fd.append("file", file); fd.append("bot_id", "bot1");
+            let res = await fetch('/upload', {method:'POST', body:fd});
+            let data = await res.json();
+            addLog(data.msg || data.error, "text-yellow-400");
+        }
+
+        async function start() {
+            addLog("Initializing Python environment...", "text-white");
+            let res = await fetch('/start/bot1');
+            let data = await res.json();
+            addLog(data.msg || data.error, "text-green-500 font-bold");
+        }
+    </script>
+</body>
+</html>
+  
