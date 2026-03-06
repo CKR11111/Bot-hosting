@@ -1,5 +1,5 @@
 flask
 requests
 pycryptodome
-protobuf==4.25.1
+protobuf==3.20.3
 gunicorn
